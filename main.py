@@ -4,4 +4,3 @@ v = Vector(1,2,3)
 w = Vector(1,2)
 s = w + v
 print(s)
-print("Heyo!")
