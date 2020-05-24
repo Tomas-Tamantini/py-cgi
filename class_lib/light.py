@@ -5,10 +5,14 @@ class Ray:
         """
         Initialize new light ray
         :param initial_point: Initial point
-        :param direction: Direction
+        :param direction: Direction (is always converted to unit vector)
         """
         self.__initial_point = initial_point
-        self.__direction = direction
+        self.__direction = direction.unit
+
+    def position_at_time(self, time):
+        """Ray position at given time"""
+        return self.initial_point + time * self.direction
 
     @property
     def initial_point(self):

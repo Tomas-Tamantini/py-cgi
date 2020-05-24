@@ -1,4 +1,5 @@
 from basics import Vector
+from math import sqrt
 
 
 def coordinate_system(i_prime):
@@ -10,3 +11,23 @@ def coordinate_system(i_prime):
         new_j = Vector(-new_i.y, new_i.x, 0).unit
     new_k = new_i ** new_j  # Vector product
     return new_i, new_j, new_k
+
+
+def min_pos_root(a, b, c):
+    """Returns the minimum positive root for the function ax²+bx+c = 0. If no positive roots exist, returns None"""
+    delta = b * b - 4 * a * c
+    if delta < 0:
+        return None
+
+    delta = sqrt(delta)
+    r1 = (-b + delta) / (2 * a)
+    r2 = (-b - delta) / (2 * a)
+
+    if r1 >= 0:
+        if r2 >= 0:
+            return min(r1, r2)
+        return r1
+    else:
+        if r2 >= 0:
+            return r2
+        return None
