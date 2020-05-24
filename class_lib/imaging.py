@@ -90,35 +90,44 @@ class Scene:
     def __init__(self, camera, objects):
         self.__camera = camera
         self.__objects = objects
-        self.background_color = Color('#87ceeb')
+        self.background_color = Color('#87CEEB')
 
-    def produce_image(self):
+    def __nearest_object_hit_by_ray(self, ray):
+        """Find closest object which intersects ray"""
+        save_object_index = None
+        minimum_distance = -1
+        for obj_index, obj in enumerate(self.__objects):
+            distance = obj.intersection_distance(ray)
+            if not distance:
+                continue
+            if distance < minimum_distance or minimum_distance < 0:
+                minimum_distance = distance
+                save_object_index = obj_index
+        if save_object_index is not None:
+            return self.__objects[save_object_index]
+        return None
+
+    def render_image(self):
         image = Image(self.__camera.image_height, self.__camera.image_width)
 
         # Loop through all pixels
         for row in range(self.__camera.image_height):
             for col in range(self.__camera.image_width):
-                # Get ray
                 ray = self.__camera.get_ray(row, col)
-
-                # Find closest object which intersects ray
-                save_object_index = None
-                minimum_distance = -1
-                for obj_index, obj in enumerate(self.__objects):
-                    distance = obj.intersection_distance(ray)
-                    if not distance:
-                        continue
-                    if distance < minimum_distance or minimum_distance < 0:
-                        minimum_distance = distance
-                        save_object_index = obj_index
-                # Draw
-                if save_object_index is not None    :
-                    print(save_object_index)
-                    # TODO: Correct this
-                    pix_color = self.__objects[save_object_index].material
-                else:
-                    # Draw background color
-                    pix_color = self.background_color
-
+                pix_color = self.ray_trace(ray)
                 image.set_pixel(row, col, pix_color)
+
         return image
+
+    def ray_trace(self, ray):
+        """Traces ray through the scene and return a color"""
+        # Find closest object which intersects ray
+        nearest_object = self.__nearest_object_hit_by_ray(ray)
+
+        # Draw
+        if nearest_object is not None:
+            # TODO: Correct this
+            return nearest_object.material
+        else:
+            # Draw background color
+            return self.background_color

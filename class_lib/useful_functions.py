@@ -1,5 +1,6 @@
 from basics import Vector
 from math import sqrt
+from globals import MIN_DIST
 
 
 def coordinate_system(i_prime):
@@ -23,11 +24,11 @@ def min_pos_root(a, b, c):
     r1 = (-b + delta) / (2 * a)
     r2 = (-b - delta) / (2 * a)
 
-    if r1 >= 0:
-        if r2 >= 0:
+    if r1 >= MIN_DIST:
+        if r2 >= MIN_DIST:
             return min(r1, r2)
         return r1
     else:
-        if r2 >= 0:
+        if r2 >= MIN_DIST:
             return r2
         return None

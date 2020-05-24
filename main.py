@@ -18,7 +18,7 @@ s2 = Sphere(Vector(2, 1, -2), 1, Color(r= 0.5,green= 0.8,b= 0.2))
 objects = [s1, s2]
 c = Camera(resolution=(HEIGHT, WIDTH), position=Vector(10, 0, 0), direction=Vector(-1, 0, 0), zoom=1, tilt_angle=0)
 s = Scene(c, objects)
-im = s.produce_image()
+im = s.render_image()
 
 im.save_as_ppm('output/test.ppm')
 
