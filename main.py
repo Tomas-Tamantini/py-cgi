@@ -6,19 +6,9 @@ Tomas Tamantini 2020
 from basics import Vector, Point
 from class_lib.light import Ray
 from class_lib.color import Color
-from class_lib.imaging import Image
+from class_lib.imaging import Image, Camera
 
-c = Color(1.0, 1.1, 0.5)
-c1 = Color(0.0, 0.5, 0.5)
-
-i = Image(20, 30)
-i.set_pixel(c1, 0, 1)
-i.set_pixel(c, 1, 2)
-i.set_pixel(0.5*c+0.5*c1, 1, 0)
-i.set_pixel( Color(1,0,0),0,0)
-i.set_pixel( Color(0,1,0),0,2)
-# x = i.get_pixel(0, 1)
-# x = Color(1, 1, 1)
-# print(x)
-i.save_as_ppm('output/test.ppm')
-
+c = Camera(resolution=(3, 3), position=Vector(10, 0, 0), direction=Vector(-1, 0, 0), zoom=0.3535, tilt_angle=0)
+for i in range(3):
+    for j in range(3):
+        print(c.get_ray(i, j))

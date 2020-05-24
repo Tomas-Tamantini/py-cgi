@@ -1,6 +1,8 @@
 from class_lib.color import BLACK
 from class_lib.light import Ray
+from class_lib.useful_functions import coordinate_system
 from basics import Vector
+from math import sqrt, sin, cos
 
 
 class Image:
@@ -49,10 +51,24 @@ class Camera:
         self.tilt_angle = tilt_angle
 
         # Auxiliary variables
+        r_ver = self.__resolution[0] - 1
+        r_hor = self.__resolution[1] - 1
+        discriminant = r_ver * r_ver + r_hor * r_hor
 
-    def __pixel_pos(self, row, column):
+        delta = 1 / (self.zoom * sqrt(discriminant)) if discriminant > 0 else 1
+        i_prime, j_aux, k_aux = coordinate_system(self.direction)
+        j_prime = j_aux * cos(self.tilt_angle) + k_aux * sin(self.tilt_angle)
+        k_prime = k_aux * cos(self.tilt_angle) - j_aux * sin(self.tilt_angle)
+
+        self.v_vertical = -delta * k_prime
+        self.v_horizontal = -delta * j_prime
+        self.offset_vertical = r_ver / 2
+        self.offset_horizontal = r_hor / 2
+
+    def __pixel_pos(self, row, column) -> Vector:
         """Pixel position given its row and column"""
-        pass
+        return self.position + self.direction + (row - self.offset_vertical) * self.v_vertical + (
+                column - self.offset_horizontal) * self.v_horizontal
 
     def get_ray(self, row, column):
         """Ray from camera through given pixel"""
