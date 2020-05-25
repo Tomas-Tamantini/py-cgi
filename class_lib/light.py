@@ -41,7 +41,7 @@ class LightSource:
 
     @property
     def intensity(self):
-        return self.intensity
+        return self.__intensity
 
 
 class AmbientLight(LightSource):
@@ -80,7 +80,7 @@ class LightSourceAtInfinity(LightSource):
 
     @property
     def direction(self):
-        return self.direction
+        return self.__direction
 
 
 class Illumination:

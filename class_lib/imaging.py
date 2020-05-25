@@ -1,6 +1,6 @@
 from class_lib.color import BLACK
 from class_lib.light import Ray
-from class_lib.useful_functions import coordinate_system
+from class_lib.useful_functions import coordinate_system, reflected_vector
 from class_lib.color import Color
 from basics import Vector
 from math import sqrt, sin, cos
@@ -131,7 +131,25 @@ class Scene:
         """Find color at given point of the scene"""
         color = BLACK
         # Ambient light:
-        color += object_hit.material.ambient_light_reflectivity ** self.__illumination.ambient_light
+        color += object_hit.material.ambient_light_reflectivity ** self.__illumination.ambient_light.intensity
+        # Light sources at infinity
+        for ls_at_infinity in self.__illumination.light_sources_at_infinity:
+            new_ray = Ray(intersection_position, ls_at_infinity.direction)
+            obstructive, obstructive_distance = self.__nearest_object_hit_by_ray(new_ray)
+            if not obstructive:
+                normal = object_hit.normal(intersection_position)
+                # Diffuse reflection
+                diffuse_multiplier = new_ray.direction * normal
+                if diffuse_multiplier > 0:
+                    color += diffuse_multiplier * object_hit.material.diffuse_light_reflectivity ** ls_at_infinity.intensity
+                # Specular reflection (Phong-Blinn)
+                h = (- ray.direction + new_ray.direction).unit
+                r = reflected_vector(new_ray.direction, normal)
+                specular_multiplier = h * r
+                if specular_multiplier > 0:
+                    specular_multiplier = object_hit.material.specular_multiplier * (
+                                specular_multiplier ** object_hit.material.specular_coefficient)
+                    color += specular_multiplier * ls_at_infinity.intensity
         return color
 
     def ray_trace(self, ray):

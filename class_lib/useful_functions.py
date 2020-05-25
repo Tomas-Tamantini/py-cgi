@@ -32,3 +32,13 @@ def min_pos_root(a, b, c):
         if r2 >= MIN_DIST:
             return r2
         return None
+
+
+def reflected_vector(v, axis):
+    """
+    Returns vector rotated 180° around a given axis
+    """
+    unit_axis = axis.unit
+    gama = unit_axis * (v * unit_axis)
+    output = 2 * gama - v
+    return output
