@@ -87,13 +87,19 @@ class Camera:
 
 
 class Scene:
-    def __init__(self, camera, objects):
+    """Collection of objects, light sources, and a camera"""
+
+    def __init__(self, camera, objects, illumination):
         self.__camera = camera
         self.__objects = objects
-        self.background_color = Color('#87CEEB')
+        self.__background_color = BLACK
+        self.__illumination = illumination
 
     def __nearest_object_hit_by_ray(self, ray):
-        """Find closest object which intersects ray"""
+        """
+        Find closest object which intersects ray
+        Returns object itself, and its distance to ray origin
+        """
         save_object_index = None
         minimum_distance = -1
         for obj_index, obj in enumerate(self.__objects):
@@ -104,30 +110,43 @@ class Scene:
                 minimum_distance = distance
                 save_object_index = obj_index
         if save_object_index is not None:
-            return self.__objects[save_object_index]
-        return None
+            return self.__objects[save_object_index], minimum_distance
+        return None, None
 
     def render_image(self):
         image = Image(self.__camera.image_height, self.__camera.image_width)
 
         # Loop through all pixels
         for row in range(self.__camera.image_height):
+            if self.__camera.image_height > 200 and (row + 1) % 50 == 0:
+                print(f"Rendering row {row + 1}/{self.__camera.image_height}")  # To give an idea of the time left
             for col in range(self.__camera.image_width):
                 ray = self.__camera.get_ray(row, col)
                 pix_color = self.ray_trace(ray)
                 image.set_pixel(row, col, pix_color)
-
+        print("Done rendering.")
         return image
+
+    def color_at(self, object_hit, intersection_position, ray):
+        """Find color at given point of the scene"""
+        color = BLACK
+        # Ambient light:
+        color += object_hit.material.ambient_light_reflectivity ** self.__illumination.ambient_light
+        return color
 
     def ray_trace(self, ray):
         """Traces ray through the scene and return a color"""
+        color = BLACK
+
         # Find closest object which intersects ray
-        nearest_object = self.__nearest_object_hit_by_ray(ray)
+        nearest_object, object_distance = self.__nearest_object_hit_by_ray(ray)
 
         # Draw
         if nearest_object is not None:
-            # TODO: Correct this
-            return nearest_object.material
+            intersection_position = ray.position_at_time(object_distance)
+            color += self.color_at(nearest_object, intersection_position, ray)
         else:
             # Draw background color
-            return self.background_color
+            return self.__background_color
+
+        return color

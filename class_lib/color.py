@@ -67,6 +67,10 @@ class Color:
         """Multiplies color by given scalar component-wise"""
         return self * other
 
+    def __pow__(self, power, modulo=None):
+        """Multiplies colors component-wise"""
+        return Color(self.__red * power.__red, self.__green * power.__green, self.__blue * power.__blue)
+
     def __str__(self):
         return f'{{{self.__red}, {self.__green}, {self.__blue}}}'
 
