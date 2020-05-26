@@ -1,9 +1,11 @@
 from class_lib.color import BLACK
-from class_lib.light import Ray
+from class_lib.light import Ray, PointLightSource
 from class_lib.useful_functions import coordinate_system, reflected_vector
 from class_lib.color import Color
 from basics import Vector
 from math import sqrt, sin, cos
+from math import inf
+from globals import MAX_RECURSION_COUNTER
 
 
 class Image:
@@ -94,6 +96,17 @@ class Scene:
         self.__objects = objects
         self.__background_color = BLACK
         self.__illumination = illumination
+        self.__recursion_counter = 0
+
+    def ray_is_obstructed(self, ray, light_source_distance):
+        """
+        Returns true if there is an object obstructing the light source and causing a shadow
+        """
+        for obj in self.__objects:
+            distance = obj.intersection_distance(ray)
+            if distance and distance <= light_source_distance:
+                return True
+        return False
 
     def __nearest_object_hit_by_ray(self, ray):
         """
@@ -114,6 +127,7 @@ class Scene:
         return None, None
 
     def render_image(self):
+        """Produce image"""
         image = Image(self.__camera.image_height, self.__camera.image_width)
 
         # Loop through all pixels
@@ -127,29 +141,53 @@ class Scene:
         print("Done rendering.")
         return image
 
-    def color_at(self, object_hit, intersection_position, ray):
+    def __get_ambient_light(self, chip):
+        return chip.material.ambient_light_reflectivity ** self.__illumination.ambient_light.intensity
+
+    @staticmethod
+    def __get_diffuse_light(chip, ray_to_light_source, light_source):
+        diffuse_multiplier = abs(ray_to_light_source.direction * chip.normal)
+        diffuse_multiplier *= light_source.attenuator_by_distance_sq(chip.position)
+        return diffuse_multiplier * chip.material.diffuse_light_reflectivity ** light_source.intensity
+
+    @staticmethod
+    def __get_phong_blinn_light(chip, incoming_ray, ray_to_light_source, light_source):
+        h = (- incoming_ray.direction + ray_to_light_source.direction).unit
+        r = reflected_vector(ray_to_light_source.direction, chip.normal)
+        specular_multiplier = abs(h * r)
+
+        specular_multiplier = chip.material.specular_multiplier * (
+                specular_multiplier ** chip.material.specular_coefficient)
+
+        specular_multiplier *= light_source.attenuator_by_distance_sq(chip.position)
+        return specular_multiplier * light_source.intensity
+
+    def color_at(self, chip, incoming_ray):
         """Find color at given point of the scene"""
         color = BLACK
+        if self.__recursion_counter >= MAX_RECURSION_COUNTER:
+            return color
+        self.__recursion_counter += 1
         # Ambient light:
-        color += object_hit.material.ambient_light_reflectivity ** self.__illumination.ambient_light.intensity
+        color += self.__get_ambient_light(chip)
+
         # Light sources at infinity
-        for ls_at_infinity in self.__illumination.light_sources_at_infinity:
-            new_ray = Ray(intersection_position, ls_at_infinity.direction)
-            obstructive, obstructive_distance = self.__nearest_object_hit_by_ray(new_ray)
-            if not obstructive:
-                normal = object_hit.normal(intersection_position)
+        for light_source in self.__illumination.light_sources:
+            new_ray = light_source.ray_to_light_source(chip.position)
+            # Check if light source is shining on the right side of the surface.
+            cos_incoming = incoming_ray.direction * chip.normal
+            cos_new_ray = new_ray.direction * chip.normal
+            if cos_incoming * cos_new_ray > 0:
+                # No good. They should have opposite signs, to indicate that the light is hitting the same side
+                # of the surface that the camera sees. Otherwise, an opaque tube would be lit inside from a light
+                # source outside, for example.
+                continue
+            # Check if light is obstructed, causing a shadow
+            if not self.ray_is_obstructed(new_ray, inf):  # Light source distance is infinity
                 # Diffuse reflection
-                diffuse_multiplier = new_ray.direction * normal
-                if diffuse_multiplier > 0:
-                    color += diffuse_multiplier * object_hit.material.diffuse_light_reflectivity ** ls_at_infinity.intensity
+                color += Scene.__get_diffuse_light(chip, new_ray, light_source)
                 # Specular reflection (Phong-Blinn)
-                h = (- ray.direction + new_ray.direction).unit
-                r = reflected_vector(new_ray.direction, normal)
-                specular_multiplier = h * r
-                if specular_multiplier > 0:
-                    specular_multiplier = object_hit.material.specular_multiplier * (
-                                specular_multiplier ** object_hit.material.specular_coefficient)
-                    color += specular_multiplier * ls_at_infinity.intensity
+                color += Scene.__get_phong_blinn_light(chip, incoming_ray, new_ray, light_source)
         return color
 
     def ray_trace(self, ray):
@@ -161,8 +199,10 @@ class Scene:
 
         # Draw
         if nearest_object is not None:
+            self.__recursion_counter = 0  # Restart recursion counter
             intersection_position = ray.position_at_time(object_distance)
-            color += self.color_at(nearest_object, intersection_position, ray)
+            chip = nearest_object.chip_at(intersection_position)
+            color += self.color_at(chip, ray)
         else:
             # Draw background color
             return self.__background_color

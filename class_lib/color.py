@@ -76,6 +76,8 @@ class Color:
 
 
 # Constant colors
-BLACK = Color(0, 0, 0)
+BLACK = Color(red=0, green=0, blue=0)
+WHITE = Color('#ffffff')
 METAL = Color(r=0.56, g=0.57, b=0.58)
 TEAL = Color('#008081')
+GRAPE = Color(.4, .3, .5)

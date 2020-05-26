@@ -1,4 +1,6 @@
-from class_lib.color import Color
+from basics import Vector
+from class_lib.useful_functions import attenuate_by_distance_sq
+from class_lib.color import Color, WHITE
 
 
 class Ray:
@@ -32,7 +34,7 @@ class Ray:
 class LightSource:
     """A source which emits light with given intensity"""
 
-    def __init__(self, intensity):
+    def __init__(self, intensity=WHITE):
         """
         Initialize light source with given intensity
         :param intensity: Color indicating how intense the light is in the RGB colors
@@ -43,6 +45,9 @@ class LightSource:
     def intensity(self):
         return self.__intensity
 
+    def attenuator_by_distance_sq(self, chip_position):
+        return 1
+
 
 class AmbientLight(LightSource):
     """Class for ambient light (doesn't produce shades and is constant everywhere. An alias for its superclass"""
@@ -52,24 +57,34 @@ class AmbientLight(LightSource):
 class PointLightSource(LightSource):
     """Light source at a specific point in space, emitting light in all directions"""
 
-    def __init__(self, intensity, position):
+    def __init__(self, intensity=WHITE, intensity_booster=5, position=Vector(0, 0, 10)):
         """
         Initialize new point light source
         :param intensity: Color indicating how intense the light is in the RGB colors
+        :param intensity_multiplier: Light decays with the square of the distance, booster helps it not be so faint
         :param position: Light source position
         """
         super().__init__(intensity)
         self.__position = position
+        self.__intensity_booster = intensity_booster
 
     @property
     def position(self):
         return self.__position
 
+    def ray_to_light_source(self, chip_position):
+        direction = self.position - chip_position
+        return Ray(chip_position, direction)
+
+    def attenuator_by_distance_sq(self, chip_position):
+        distance_sq = (self.position - chip_position).length_sq
+        return self.__intensity_booster * attenuate_by_distance_sq(distance_sq)
+
 
 class LightSourceAtInfinity(LightSource):
     """Light coming from infinity in parallel rays (for example, the sun)"""
 
-    def __init__(self, intensity, direction):
+    def __init__(self, intensity=WHITE, direction=Vector(0, 0, 1)):
         """
         Initialize new light source at infinity
         :param intensity: Color indicating how intense the light is in the RGB colors
@@ -82,10 +97,18 @@ class LightSourceAtInfinity(LightSource):
     def direction(self):
         return self.__direction
 
+    def ray_to_light_source(self, chip_position):
+        return Ray(chip_position, self.direction)
+
 
 class Illumination:
     """Class for storing light sources"""
-    def __init__(self, ambient_light=Color('#555555'), point_light_sources=None, light_sources_at_infinity=None):
+
+    def __init__(self, ambient_light=WHITE * 0.25, light_sources=None):
+        """
+        Initializes new illumination
+        :param ambient_light: Ambient light of the scene
+        :param light_sources: Punctual light sources and light sources at infinity
+        """
         self.ambient_light = ambient_light
-        self.point_light_sources = point_light_sources if point_light_sources else []
-        self.light_sources_at_infinity = light_sources_at_infinity if light_sources_at_infinity else []
+        self.light_sources = light_sources if light_sources else []

@@ -42,3 +42,10 @@ def reflected_vector(v, axis):
     gama = unit_axis * (v * unit_axis)
     output = 2 * gama - v
     return output
+
+
+def attenuate_by_distance_sq(distance_sq):
+    if distance_sq > 0.1:
+        return 1 / distance_sq
+    else:
+        return 10
