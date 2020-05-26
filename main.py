@@ -9,17 +9,18 @@ from class_lib.color import *
 from class_lib.imaging import Image, Camera, Scene
 from class_lib.solid_objects import *
 
-HEIGHT = 250
-WIDTH = 300
+HEIGHT = 500
+WIDTH = 600
 
 s1 = Sphere(Vector(0, 0, 1), 2,
             Material(diffuse_light_reflectivity=METAL,
-                     specular_multiplier=0.5, specular_coefficient=20))  # Teal
+                     specular_multiplier=0.5, specular_coefficient=20, reflective_index=.3
+                     ))  # Teal
 s2 = Sphere(Vector(1, 1, -1), .5, Material(diffuse_light_reflectivity=TEAL,
                                            specular_multiplier=.5, specular_coefficient=20))
 
 s3 = Sphere(Vector(0, 0, -2), .8, Material(diffuse_light_reflectivity=GRAPE,
-                                           specular_multiplier=.5, specular_coefficient=20))
+                                           specular_multiplier=.5, specular_coefficient=20, reflective_index=.5))
 
 objects = [s1, s2, s3]
 

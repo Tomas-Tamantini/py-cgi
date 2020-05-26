@@ -1,6 +1,6 @@
 from class_lib.color import BLACK
 from class_lib.light import Ray, PointLightSource
-from class_lib.useful_functions import coordinate_system, reflected_vector
+from class_lib.useful_functions import coordinate_system, reflected_vector, attenuate_by_distance_sq
 from class_lib.color import Color
 from basics import Vector
 from math import sqrt, sin, cos
@@ -96,7 +96,6 @@ class Scene:
         self.__objects = objects
         self.__background_color = BLACK
         self.__illumination = illumination
-        self.__recursion_counter = 0
 
     def ray_is_obstructed(self, ray, light_source_distance):
         """
@@ -162,16 +161,15 @@ class Scene:
         specular_multiplier *= light_source.attenuator_by_distance_sq(chip.position)
         return specular_multiplier * light_source.intensity
 
-    def color_at(self, chip, incoming_ray):
+    def color_at(self, chip, incoming_ray, recursion_depth):
         """Find color at given point of the scene"""
         color = BLACK
-        if self.__recursion_counter >= MAX_RECURSION_COUNTER:
+        if recursion_depth >= MAX_RECURSION_COUNTER:
             return color
-        self.__recursion_counter += 1
         # Ambient light:
         color += self.__get_ambient_light(chip)
 
-        # Light sources at infinity
+        # Light sources:
         for light_source in self.__illumination.light_sources:
             new_ray = light_source.ray_to_light_source(chip.position)
             # Check if light source is shining on the right side of the surface.
@@ -188,6 +186,20 @@ class Scene:
                 color += Scene.__get_diffuse_light(chip, new_ray, light_source)
                 # Specular reflection (Phong-Blinn)
                 color += Scene.__get_phong_blinn_light(chip, incoming_ray, new_ray, light_source)
+        # Recursive bits: Reflection and refraction
+        # Reflection
+        if chip.material.reflective_index > 0:
+            new_direction = -reflected_vector(incoming_ray.direction, chip.normal)
+            reflected_ray = Ray(chip.position, new_direction)
+
+            # Find nearest object
+            nearest_object, object_distance = self.__nearest_object_hit_by_ray(reflected_ray)
+            if nearest_object is not None:
+                intersection_position = reflected_ray.position_at_time(object_distance)
+                new_chip = nearest_object.chip_at(intersection_position)
+                attenuation = chip.material.reflective_index
+                color += attenuation * self.color_at(new_chip, reflected_ray, recursion_depth + 1)
+
         return color
 
     def ray_trace(self, ray):
@@ -199,10 +211,9 @@ class Scene:
 
         # Draw
         if nearest_object is not None:
-            self.__recursion_counter = 0  # Restart recursion counter
             intersection_position = ray.position_at_time(object_distance)
             chip = nearest_object.chip_at(intersection_position)
-            color += self.color_at(chip, ray)
+            color += self.color_at(chip, ray, recursion_depth=0)
         else:
             # Draw background color
             return self.__background_color

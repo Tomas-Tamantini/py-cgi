@@ -6,18 +6,20 @@ class Material:
     """Material optical specifications"""
 
     def __init__(self, ambient_light_reflectivity=None, diffuse_light_reflectivity=GRAPE, specular_multiplier=.5,
-                 specular_coefficient=20):
+                 specular_coefficient=20, reflective_index = 0):
         """
         Initialize new material
         :param ambient_light_reflectivity: Color indicating the percentage of light the material reflects from ambient light in RGB
         :param diffuse_light_reflectivity: Color indicating the percentage of light the material reflects by diffusion in RGB
         :param specular_multiplier: Percentage of light received which is reflected by specular reflection
         :param specular_coefficient: Power to which the cosine between R and H is raised in the Blinn-Phong reflection model
+        :param reflective_index: Percentage of light which is reflected by surface like a mirror
         """
         self.ambient_light_reflectivity = ambient_light_reflectivity if ambient_light_reflectivity else diffuse_light_reflectivity
         self.diffuse_light_reflectivity = diffuse_light_reflectivity
         self.specular_multiplier = specular_multiplier
         self.specular_coefficient = specular_coefficient
+        self.reflective_index = reflective_index
 
 
 class Chip:
