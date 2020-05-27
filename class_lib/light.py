@@ -1,6 +1,9 @@
+from math import inf
+
 from basics import Vector
+
+from class_lib.color import WHITE
 from class_lib.useful_functions import attenuate_by_distance_sq
-from class_lib.color import Color, WHITE
 
 
 class Ray:
@@ -61,7 +64,7 @@ class PointLightSource(LightSource):
         """
         Initialize new point light source
         :param intensity: Color indicating how intense the light is in the RGB colors
-        :param intensity_multiplier: Light decays with the square of the distance, booster helps it not be so faint
+        :param intensity_booster: Light decays with the square of the distance, booster helps it not be so faint
         :param position: Light source position
         """
         super().__init__(intensity)
@@ -75,6 +78,9 @@ class PointLightSource(LightSource):
     def ray_to_light_source(self, chip_position):
         direction = self.position - chip_position
         return Ray(chip_position, direction)
+
+    def distance_to_point(self, point_position):
+        return (self.position - point_position).length
 
     def attenuator_by_distance_sq(self, chip_position):
         distance_sq = (self.position - chip_position).length_sq
@@ -99,6 +105,9 @@ class LightSourceAtInfinity(LightSource):
 
     def ray_to_light_source(self, chip_position):
         return Ray(chip_position, self.direction)
+
+    def distance_to_point(self, point_position):
+        return inf
 
 
 class Illumination:

@@ -2,15 +2,13 @@
 py-cgi - A python ray tracing program
 Tomas Tamantini 2020
 """
-
-from basics import Vector, Point
-from class_lib.light import *
 from class_lib.color import *
-from class_lib.imaging import Image, Camera, Scene
+from class_lib.imaging import Camera, Scene
+from class_lib.light import *
 from class_lib.solid_objects import *
 
-HEIGHT = 500
-WIDTH = 600
+HEIGHT = 50
+WIDTH = 60
 
 s1 = Sphere(Vector(0, 0, 1), 2,
             Material(diffuse_light_reflectivity=METAL,
@@ -38,5 +36,5 @@ c = Camera(resolution=(HEIGHT, WIDTH), position=Vector(10, 0, 0), direction=Vect
 s = Scene(c, objects, illumination)
 im = s.render_image()
 
-im.save_as_ppm('output/test.ppm')
+im.save_as_png('output/test.png')
 print("Image saved.")

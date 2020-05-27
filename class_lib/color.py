@@ -62,9 +62,12 @@ class Color:
         scaled_up_value = round(255 * value)
         return max(min(scaled_up_value, 255), 0)
 
+    def as_int_tuple(self):
+        return tuple(map(self.__map_to_0_255, (self.__red, self.__green, self.__blue)))
+
     def ppm_string(self):
         """Returns RGB value separated by spaces"""
-        mapped_values = tuple(map(self.__map_to_0_255, (self.__red, self.__green, self.__blue)))
+        mapped_values = self.as_int_tuple()
         return f'{mapped_values[0]} {mapped_values[1]} {mapped_values[2]}'
 
     def __add__(self, other):

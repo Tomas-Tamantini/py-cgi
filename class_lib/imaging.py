@@ -1,10 +1,12 @@
-from class_lib.color import BLACK
-from class_lib.light import Ray, PointLightSource
-from class_lib.useful_functions import coordinate_system, reflected_vector, attenuate_by_distance_sq
-from class_lib.color import Color
-from basics import Vector
 from math import sqrt, sin, cos
-from math import inf
+
+from PIL import Image as PillowImage
+from basics import Vector
+from numpy import array, uint8
+
+from class_lib.color import BLACK
+from class_lib.light import Ray
+from class_lib.useful_functions import coordinate_system, reflected_vector
 from globals import MAX_RECURSION_COUNTER
 
 
@@ -27,7 +29,16 @@ class Image:
         """Sets pixel to given color"""
         self.__pixels[row][column] = color
 
+    def save_as_png(self, file_name):
+        """Save image as png file"""
+        new_pixel_map = [[self.get_pixel(i, j).as_int_tuple() for j in range(self.__width)] for i in
+                         range(self.__height)]
+        pixel_array = array(new_pixel_map, dtype=uint8)
+        new_image = PillowImage.fromarray(pixel_array)
+        new_image.save(file_name)
+
     def save_as_ppm(self, file_name):
+        """Save image as PPM file"""
         with open(file_name, 'w') as img_file:
             # Write header
             # Indicate that it is a ppm file, and give width and height
@@ -192,7 +203,8 @@ class Scene:
                 # source outside, for example.
                 continue
             # Check if light is obstructed, causing a shadow
-            if not self.ray_is_obstructed(new_ray, inf):  # Light source distance is infinity
+            # TODO: Correct next line.
+            if not self.ray_is_obstructed(new_ray, light_source.distance_to_point(chip.position)):  # Light source distance is infinity
                 # Diffuse reflection
                 color += Scene.__get_diffuse_light(chip, new_ray, light_source)
                 # Specular reflection (Phong-Blinn)
