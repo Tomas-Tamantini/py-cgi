@@ -161,6 +161,17 @@ class Scene:
         specular_multiplier *= light_source.attenuator_by_distance_sq(chip.position)
         return specular_multiplier * light_source.intensity
 
+    @staticmethod
+    def __get_refracted_ray(chip, incoming_ray, ray_is_coming_from_outside):
+        alpha = 1 / chip.material.refractive_index if ray_is_coming_from_outside else chip.material.refractive_index
+        aux = alpha * incoming_ray.direction * chip.normal
+        discriminant = aux * aux + 1 - alpha * alpha
+        if discriminant < 0:
+            return None
+        beta = -aux - sqrt(discriminant) if ray_is_coming_from_outside else -aux + sqrt(discriminant)
+        new_direction = alpha * incoming_ray.direction + beta * chip.normal
+        return Ray(chip.position, new_direction)
+
     def color_at(self, chip, incoming_ray, recursion_depth):
         """Find color at given point of the scene"""
         color = BLACK
@@ -190,15 +201,30 @@ class Scene:
         # Reflection
         if chip.material.reflective_index > 0:
             new_direction = -reflected_vector(incoming_ray.direction, chip.normal)
-            reflected_ray = Ray(chip.position, new_direction)
+            refracted_ray = Ray(chip.position, new_direction)
 
             # Find nearest object
-            nearest_object, object_distance = self.__nearest_object_hit_by_ray(reflected_ray)
+            nearest_object, object_distance = self.__nearest_object_hit_by_ray(refracted_ray)
             if nearest_object is not None:
-                intersection_position = reflected_ray.position_at_time(object_distance)
+                intersection_position = refracted_ray.position_at_time(object_distance)
                 new_chip = nearest_object.chip_at(intersection_position)
                 attenuation = chip.material.reflective_index
-                color += attenuation * self.color_at(new_chip, reflected_ray, recursion_depth + 1)
+                color += attenuation * self.color_at(new_chip, refracted_ray, recursion_depth + 1)
+        # Refraction
+        if chip.material.is_refractive:
+            ray_is_coming_from_outside = chip.normal * incoming_ray.direction < 0
+            refracted_ray = Scene.__get_refracted_ray(chip, incoming_ray, ray_is_coming_from_outside)
+            if refracted_ray:
+                # Find nearest object
+                nearest_object, object_distance = self.__nearest_object_hit_by_ray(refracted_ray)
+                if nearest_object is not None:
+                    intersection_position = refracted_ray.position_at_time(object_distance)
+                    new_chip = nearest_object.chip_at(intersection_position)
+                    new_color = self.color_at(new_chip, refracted_ray, recursion_depth + 1)
+                    vector_travelled = incoming_ray.initial_point - chip.position if ray_is_coming_from_outside else chip.position - new_chip.position
+                    distance_travelled = vector_travelled.length
+                    attenuated_color = chip.material.attenuate_by_refraction(new_color, distance_travelled)
+                    color += attenuated_color
 
         return color
 

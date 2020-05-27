@@ -44,6 +44,18 @@ class Color:
         else:
             self.__red, self.__green, self.__blue = 0, 0, 0
 
+    @property
+    def red(self):
+        return self.__red
+
+    @property
+    def green(self):
+        return self.__green
+
+    @property
+    def blue(self):
+        return self.__blue
+
     @staticmethod
     def __map_to_0_255(value):
         """Maps a float between 0 and 1 to an int between 0 and 255"""

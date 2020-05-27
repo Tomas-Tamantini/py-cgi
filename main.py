@@ -15,14 +15,19 @@ WIDTH = 600
 s1 = Sphere(Vector(0, 0, 1), 2,
             Material(diffuse_light_reflectivity=METAL,
                      specular_multiplier=0.5, specular_coefficient=20, reflective_index=.3
-                     ))  # Teal
+                     ))
 s2 = Sphere(Vector(1, 1, -1), .5, Material(diffuse_light_reflectivity=TEAL,
                                            specular_multiplier=.5, specular_coefficient=20))
 
 s3 = Sphere(Vector(0, 0, -2), .8, Material(diffuse_light_reflectivity=GRAPE,
                                            specular_multiplier=.5, specular_coefficient=20, reflective_index=.5))
+s4 = Sphere(Vector(3.5, .5, -1), .4,
+            Material(diffuse_light_reflectivity=WHITE * 0.01,
+                     specular_multiplier=.5, specular_coefficient=20, reflective_index=0, refractive_index=1.05,
+                     refractive_attenuation=Color(0.01, 0.01, 0.01)
+                     ))
 
-objects = [s1, s2, s3]
+objects = [s1, s2, s3, s4]
 
 l1 = LightSourceAtInfinity(intensity=Color('#ffffff'), direction=Vector(2, 1, 3))
 l2 = LightSourceAtInfinity(intensity=Color('#002255'), direction=Vector(0, -1, 0))
