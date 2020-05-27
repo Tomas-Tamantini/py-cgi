@@ -203,7 +203,6 @@ class Scene:
                 # source outside, for example.
                 continue
             # Check if light is obstructed, causing a shadow
-            # TODO: Correct next line.
             if not self.ray_is_obstructed(new_ray, light_source.distance_to_point(chip.position)):  # Light source distance is infinity
                 # Diffuse reflection
                 color += Scene.__get_diffuse_light(chip, new_ray, light_source)
