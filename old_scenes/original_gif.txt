@@ -1,3 +1,4 @@
+ATTENTION: SmoothSphere class was moved, and import in this file must be updated
 """
 py-cgi - A python ray tracing program
 Tomas Tamantini 2020
@@ -36,10 +37,10 @@ for i in range(num_frames):
     m3 = Material(diffuse_light_reflectivity=GRAPE, specular_multiplier=0.5, reflective_index=0.4)
     mb = Material(diffuse_light_reflectivity=WHITE * 0.2, specular_multiplier=0.5, reflective_index=0.5)
 
-    s1 = Sphere(c1, radius, m1)
-    s2 = Sphere(c2, radius, m2)
-    s3 = Sphere(c3, radius, m3)
-    base = Sphere(cb, big_radius, mb)
+    s1 = SmoothSphere(c1, radius, m1)
+    s2 = SmoothSphere(c2, radius, m2)
+    s3 = SmoothSphere(c3, radius, m3)
+    base = SmoothSphere(cb, big_radius, mb)
 
     solid_objects = [s1, s2, s3, base]
 

@@ -1,13 +1,14 @@
-from class_lib.color import GRAPE, Color
-from class_lib.useful_functions import min_pos_root
+from abc import ABC, abstractmethod
+
+from class_lib.color import *
 from math import log, exp
 
 
 class Material:
     """Material optical specifications"""
 
-    def __init__(self, ambient_light_reflectivity=None, diffuse_light_reflectivity=GRAPE, specular_multiplier=0,
-                 specular_coefficient=20, reflective_index=0, refractive_index=1,
+    def __init__(self, ambient_light_reflectivity=None, diffuse_light_reflectivity=GRAPE, specular_multiplier=.0,
+                 specular_coefficient=20, reflective_index=.0, refractive_index=1.0,
                  refractive_attenuation=Color(1, 1, 1)):
         """
         Initialize new material
@@ -60,26 +61,34 @@ class Chip:
         self.material = material
 
 
-class Sphere:
-    def __init__(self, position, radius, material):
-        """Initialize new sphere"""
-        self.__position = position
-        self.__radius = radius
-        self.__material = material
+class AbstractObject(ABC):
+    """Abstract object with position and orientation"""
 
-    def chip_at(self, position):
-        return Chip(position, self.__normal(position), self.__material)
-
-    def __normal(self, position):
-        return (position - self.__position).unit
+    def __init__(self, coordinate_system):
+        self.coordinate_system = coordinate_system
 
     def intersection_distance(self, ray):
-        """
-        If ray doesn't intersect sphere, returns None.
-        If it does, returns time when ray intersects sphere
-        """
-        dist = ray.initial_point - self.__position
-        a = 1  # Because ray direction is unit. Otherwise, should be ray.direction.length_sq
-        b = 2 * ray.direction * dist
-        c = dist.length_sq - self.__radius * self.__radius
-        return min_pos_root(a, b, c)
+        new_ray_init_point = self.coordinate_system.convert_position(ray.initial_point)
+        new_ray_direction = self.coordinate_system.convert_direction(ray.direction)
+        return self.easier_intersection(new_ray_init_point, new_ray_direction)
+
+    def chip_at(self, position):
+        relative_position = self.coordinate_system.convert_position(position)
+        normal = self.normal_at(relative_position)
+        fixed_normal = self.coordinate_system.deconvert_direction(normal)
+        material = self.material_at(relative_position)
+        return Chip(position, fixed_normal, material)
+
+    @abstractmethod
+    def normal_at(self, rel_position):
+        raise NotImplementedError("Must be overridden")
+
+    @abstractmethod
+    def material_at(self, rel_position):
+        raise NotImplementedError("Must be overridden")
+
+    @abstractmethod
+    def easier_intersection(self, ray_p0, ray_dir):
+        raise NotImplementedError("Must be overridden")
+
+

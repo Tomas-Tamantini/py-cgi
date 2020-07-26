@@ -5,8 +5,9 @@ from basics import Vector
 from numpy import array, uint8
 
 from class_lib.color import BLACK
+from class_lib.coordinate_system import CoordinateSystem
 from class_lib.light import Ray
-from class_lib.useful_functions import coordinate_system, reflected_vector
+from class_lib.useful_functions import reflected_vector
 from globals import MAX_RECURSION_COUNTER
 
 
@@ -73,9 +74,8 @@ class Camera:
         discriminant = r_ver * r_ver + r_hor * r_hor
 
         delta = 1 / (self.__zoom * sqrt(discriminant)) if discriminant > 0 else 1
-        i_prime, j_aux, k_aux = coordinate_system(self.__direction)
-        j_prime = j_aux * cos(self.__tilt_angle) + k_aux * sin(self.__tilt_angle)
-        k_prime = k_aux * cos(self.__tilt_angle) - j_aux * sin(self.__tilt_angle)
+
+        i_prime, j_prime, k_prime = CoordinateSystem.unit_base_axis(self.__direction, self.__tilt_angle)
 
         self.v_vertical = -delta * k_prime
         self.v_horizontal = -delta * j_prime
