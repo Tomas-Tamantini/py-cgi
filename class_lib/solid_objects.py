@@ -6,7 +6,7 @@ from math import log, exp
 class Material:
     """Material optical specifications"""
 
-    def __init__(self, ambient_light_reflectivity=None, diffuse_light_reflectivity=GRAPE, specular_multiplier=.5,
+    def __init__(self, ambient_light_reflectivity=None, diffuse_light_reflectivity=GRAPE, specular_multiplier=0,
                  specular_coefficient=20, reflective_index=0, refractive_index=1,
                  refractive_attenuation=Color(1, 1, 1)):
         """

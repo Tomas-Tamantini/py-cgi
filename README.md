@@ -10,7 +10,7 @@ Program includes 5 different optical effects:
 * Mirror-like reflection
 * Refraction
 
-The 5 stages below show the addition of each of those effects:
+The 5 stages below show the addition of each of those effects.
 ![Ambient](output/showcase/amb.png)
 ![Diffuse](output/showcase/diff.png)
 ![Specular](output/showcase/spec.png)

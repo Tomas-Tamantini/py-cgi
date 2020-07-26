@@ -29,12 +29,15 @@ class Image:
         """Sets pixel to given color"""
         self.__pixels[row][column] = color
 
-    def save_as_png(self, file_name):
-        """Save image as png file"""
+    def as_pillow_image(self):
         new_pixel_map = [[self.get_pixel(i, j).as_int_tuple() for j in range(self.__width)] for i in
                          range(self.__height)]
         pixel_array = array(new_pixel_map, dtype=uint8)
-        new_image = PillowImage.fromarray(pixel_array)
+        return PillowImage.fromarray(pixel_array)
+
+    def save_as_png(self, file_name):
+        """Save image as png file"""
+        new_image = self.as_pillow_image()
         new_image.save(file_name)
 
     def save_as_ppm(self, file_name):
@@ -164,7 +167,7 @@ class Scene:
     def __get_phong_blinn_light(chip, incoming_ray, ray_to_light_source, light_source):
         h = (- incoming_ray.direction + ray_to_light_source.direction).unit
         r = reflected_vector(ray_to_light_source.direction, chip.normal)
-        specular_multiplier = abs(h * r)
+        specular_multiplier = max(h * r, 0)
 
         specular_multiplier = chip.material.specular_multiplier * (
                 specular_multiplier ** chip.material.specular_coefficient)
@@ -203,7 +206,8 @@ class Scene:
                 # source outside, for example.
                 continue
             # Check if light is obstructed, causing a shadow
-            if not self.ray_is_obstructed(new_ray, light_source.distance_to_point(chip.position)):  # Light source distance is infinity
+            if not self.ray_is_obstructed(new_ray, light_source.distance_to_point(
+                    chip.position)):  # Light source distance is infinity
                 # Diffuse reflection
                 color += Scene.__get_diffuse_light(chip, new_ray, light_source)
                 # Specular reflection (Phong-Blinn)
