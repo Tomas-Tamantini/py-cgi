@@ -3,7 +3,7 @@ Python program for generating and displaying 3D CGI using a ray tracer algorithm
 
 Author: Tomas Tamantini 2020
 
-![Showcase](output/showcase/mentos.png)
+![Showcase](output/showcase/mentos3.png)
 
 Program includes 5 different optical effects:
 * Ambient light
