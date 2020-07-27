@@ -1,10 +1,7 @@
 from abc import ABC, abstractmethod
-from math import floor, inf
-
+from math import floor
 from basics import Vector
-
 from class_lib.color import *
-from class_lib.coordinate_system import CoordinateSystem
 from class_lib.solid_objects import AbstractObject, Material
 from globals import MIN_DIST
 
@@ -42,7 +39,7 @@ class AbstractPlane(AbstractObject, ABC):
 class SmoothPlane(AbstractPlane):
 
     def __init__(self, coordinate_system, material, width=None, length=None):
-        super().__init__(coordinate_system, width, length)
+        AbstractPlane.__init__(self, coordinate_system, width, length)
         self.material = material
 
     def material_at(self, rel_position):

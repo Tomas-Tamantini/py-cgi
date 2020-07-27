@@ -3,6 +3,8 @@ Python program for generating and displaying 3D CGI using a ray tracer algorithm
 
 Author: Tomas Tamantini 2020
 
+![Showcase](output/showcase/mentos.png)
+
 Program includes 5 different optical effects:
 * Ambient light
 * Diffuse reflection
@@ -11,8 +13,8 @@ Program includes 5 different optical effects:
 * Refraction
 
 The 5 stages below show the addition of each of those effects.
-![Ambient](output/showcase/amb.png)
-![Diffuse](output/showcase/diff.png)
-![Specular](output/showcase/spec.png)
-![Reflection](output/showcase/refl.png)
-![Refraction](output/showcase/refr.png)
+![Ambient](output/ray_tracer_steps/amb.png)
+![Diffuse](output/ray_tracer_steps/diff.png)
+![Specular](output/ray_tracer_steps/spec.png)
+![Reflection](output/ray_tracer_steps/refl.png)
+![Refraction](output/ray_tracer_steps/refr.png)

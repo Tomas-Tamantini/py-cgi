@@ -90,5 +90,3 @@ class AbstractObject(ABC):
     @abstractmethod
     def easier_intersection(self, ray_p0, ray_dir):
         raise NotImplementedError("Must be overridden")
-
-
