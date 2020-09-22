@@ -7,11 +7,12 @@ from class_lib.solid_objects import *
 from class_lib.solids.ellipsoid import Ellipsoid
 from class_lib.solids.plane import SmoothPlane
 
-HEIGHT = 45*8
-WIDTH = 75*8
+res = 1
+HEIGHT = 45 * res
+WIDTH = 75 * res
 
 lens_material = Material(diffuse_light_reflectivity=WHITE * 0.01,
-                         specular_multiplier=.85, specular_coefficient=20, reflective_index=0, refractive_index=1.1,
+                         specular_multiplier=.85, specular_coefficient=20, reflective_index=0.3, refractive_index=1.1,
                          refractive_attenuation=Color(0.03, 0.01, 0.01)
                          )
 
@@ -38,10 +39,11 @@ for i in range(num_candies):
     candies.append(new_candy)
 
 position = Vector((num_candies + 2) * candy_width / 2, 0, candy_width / 2)
-color = choice(colors)
-while color == previous_color:
-    color = choice(colors)
-material = Material(diffuse_light_reflectivity=color, specular_multiplier=0.5)
+color = choice(colors) * 0.3
+material = Material(diffuse_light_reflectivity=WHITE * 0.01,
+                    specular_multiplier=.85, specular_coefficient=20, reflective_index=0.3, refractive_index=1.1,
+                    refractive_attenuation=Color(0.03, 0.01, 0.01)
+                    )
 last_candy = Ellipsoid(CoordinateSystem(origin=position), material, height=candy_width)
 candies.append(last_candy)
 
@@ -51,9 +53,9 @@ l1 = LightSourceAtInfinity(intensity=Color('#ffffff'), direction=Vector(2, 3, 3)
 l2 = PointLightSource(intensity=Color('#00ff00'), intensity_booster=2, position=Vector(0, 1, 2))
 illumination = Illumination(ambient_light=AmbientLight(intensity=WHITE * 0.2), light_sources=[l1, l2])
 
-camera_pos = Vector(5, 7, 2) * 0.75
+camera_pos = Vector(5, 2, 2 - 0.3) * 1
 
-c = Camera(resolution=(HEIGHT, WIDTH), position=camera_pos, direction=-camera_pos + Vector(0, -0.5, 0.9), zoom=1,
+c = Camera(resolution=(HEIGHT, WIDTH), position=camera_pos, direction=-camera_pos + Vector(0, -0.5, 0.1), zoom=1,
            tilt_angle=0)
 
 scene = Scene(c, objects, illumination)
