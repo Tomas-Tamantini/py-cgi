@@ -144,6 +144,8 @@ class Scene:
         image = Image(self.__camera.image_height, self.__camera.image_width)
 
         # Loop through all pixels
+        # TODO: Split up this loop between cores, to make program more efficient.
+        #  Or should I actually create different images, and then merge them at the end?
         for row in range(self.__camera.image_height):
             if self.__camera.image_height > 200 and (row + 1) % 50 == 0:
                 print(f"Rendering row {row + 1}/{self.__camera.image_height}")  # To give an idea of the time left
